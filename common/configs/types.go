@@ -11,7 +11,7 @@ const (
 	bcryptSalt = "BCRYPT_SALT"
 )
 
-type Runtime struct {
+type RuntimeConfig struct {
 	App appCfg `mapstructure:"App"`
 	API apiCfg `mapstructure:"API"`
 	DB  dbCfg  `mapstructure:"DB"`

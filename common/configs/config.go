@@ -6,7 +6,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewConfig() (*Runtime, error) {
+var Runtime *RuntimeConfig
+
+func NewConfig() error {
+	callerInfo := "[configs.NewConfig]"
+
 	runtimeViper := viper.New()
 
 	// Get config from env vars
@@ -15,16 +19,16 @@ func NewConfig() (*Runtime, error) {
 	// Get config from file
 	err := readConfigFile(runtimeViper, "config", "toml", "./configs")
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("%s failed to read config file: %v\n", callerInfo, err)
 	}
 
 	// Load config into runtimeConfig
-	runtimeConfig, err := loadConfig(runtimeViper)
+	Runtime, err = loadConfig(runtimeViper)
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("%s failed to load config: %v\n", callerInfo, err)
 	}
 
-	return runtimeConfig, nil
+	return nil
 }
 
 func readEnv(runtimeViper *viper.Viper) {
@@ -44,6 +48,8 @@ func readEnv(runtimeViper *viper.Viper) {
 }
 
 func readConfigFile(runtimeViper *viper.Viper, fileName, fileType string, filePath ...string) error {
+	callerInfo := "[configs.readConfigFile]"
+
 	runtimeViper.SetConfigName(fileName)
 	runtimeViper.SetConfigType(fileType)
 	for _, path := range filePath {
@@ -52,31 +58,33 @@ func readConfigFile(runtimeViper *viper.Viper, fileName, fileType string, filePa
 
 	err := runtimeViper.ReadInConfig()
 	if err != nil {
-		return err
+		return fmt.Errorf("%s failed to read config file: %v\n", callerInfo, err)
 	}
 	return nil
 }
 
-func loadConfig(runtimeViper *viper.Viper) (*Runtime, error) {
+func loadConfig(runtimeViper *viper.Viper) (*RuntimeConfig, error) {
+	callerInfo := "[configs.loadConfig]"
+
 	// load env vars to dbCfg and apiCfg
 	dbConfig, apiConfig := &dbCfg{}, &apiCfg{}
 	err := runtimeViper.Unmarshal(dbConfig)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode dbConfig: %v\n", err)
+		return nil, fmt.Errorf("%s failed to decode dbConfig: %v\n", callerInfo, err)
 	}
 	err = runtimeViper.Unmarshal(apiConfig)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode dbConfig: %v\n", err)
+		return nil, fmt.Errorf("%s failed to decode apiConfig: %v\n", callerInfo, err)
 	}
 
 	// set env vars to runtimeConfig before decode from config file
-	runtimeConfig := &Runtime{
+	runtimeConfig := &RuntimeConfig{
 		API: *apiConfig,
 		DB:  *dbConfig,
 	}
 	err = runtimeViper.Unmarshal(runtimeConfig)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s failed to decode runtimeConfig: %v\n", callerInfo, err)
 	}
 
 	return runtimeConfig, nil
