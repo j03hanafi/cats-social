@@ -1,0 +1,9 @@
+[App]
+    Name = "cats_social"
+    Host = ""
+    Port = 9000
+    Version = "1.0.0"
+[API]
+    BaseURL = "/api/v1"
+    Timeout = 10
+    Debug = true
