@@ -7,6 +7,7 @@ import (
 
 	"cats-social/common/configs"
 	"cats-social/common/logger"
+	"cats-social/internal/server"
 )
 
 func Run() {
@@ -26,5 +27,5 @@ func Run() {
 	}()
 	zap.ReplaceGlobals(l)
 
-	zap.L().Info("Configs", zap.Any("Runtime", configs.Runtime))
+	server.Run()
 }

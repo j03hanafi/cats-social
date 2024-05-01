@@ -19,9 +19,10 @@ type RuntimeConfig struct {
 
 type appCfg struct {
 	Name    string `mapstructure:"Name"`
-	Host    string `mapstructure:"host"`
+	Host    string `mapstructure:"Host"`
 	Port    int    `mapstructure:"Port"`
 	Version string `mapstructure:"Version"`
+	Env     string `mapstructure:"Env"`
 }
 
 type apiCfg struct {
