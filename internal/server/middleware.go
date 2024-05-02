@@ -1,21 +1,29 @@
 package server
 
 import (
+	"net/http"
+
 	"github.com/gofiber/contrib/fiberzap/v2"
+	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cache"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/etag"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
+	"github.com/golang-jwt/jwt/v5"
 	"go.uber.org/zap"
 
+	"cats-social/common/configs"
 	"cats-social/common/id"
 	"cats-social/common/logger"
+	"cats-social/common/security"
+	"cats-social/internal/domain"
 )
 
 const (
-	requestId = "requestId"
+	requestId   = "requestId"
+	accessToken = "accessToken"
 )
 
 func setMiddlewares(app *fiber.App) {
@@ -85,4 +93,31 @@ func cacheMiddleware() fiber.Handler {
 
 func eTagMiddleware() fiber.Handler {
 	return etag.New()
+}
+
+func jwtMiddleware() fiber.Handler {
+	return jwtware.New(jwtware.Config{
+		SigningKey: jwtware.SigningKey{
+			JWTAlg: jwtware.HS256,
+			Key:    []byte(configs.Runtime.API.JWT.JWTSecret),
+		},
+		Claims:     &security.AccessTokenClaims{},
+		ContextKey: accessToken,
+		SuccessHandler: func(c *fiber.Ctx) error {
+			claims := c.Locals(accessToken).(*jwt.Token).Claims.(*security.AccessTokenClaims)
+
+			user := domain.User{
+				ID:    claims.User.ID,
+				Email: claims.User.Email,
+				Name:  claims.User.Name,
+			}
+			c.Locals(domain.UserFromToken, user)
+			return c.Next()
+		},
+		ErrorHandler: func(c *fiber.Ctx, err error) error {
+			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
+				"message": err.Error(),
+			})
+		},
+	})
 }

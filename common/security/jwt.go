@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/oklog/ulid/v2"
 	"go.uber.org/zap"
 
 	"cats-social/common/configs"
@@ -11,8 +12,14 @@ import (
 )
 
 type AccessTokenClaims struct {
-	User domain.User `json:"user"`
+	User user `json:"user"`
 	jwt.RegisteredClaims
+}
+
+type user struct {
+	ID    ulid.ULID `json:"id"`
+	Email string    `json:"email"`
+	Name  string    `json:"name"`
 }
 
 func GenerateAccessToken(u domain.User) (string, error) {
@@ -23,7 +30,11 @@ func GenerateAccessToken(u domain.User) (string, error) {
 	tokenExp := currentTime.Add(time.Duration(configs.Runtime.API.JWT.Expire) * time.Second)
 
 	claims := AccessTokenClaims{
-		User: u,
+		User: user{
+			ID:    u.ID,
+			Email: u.Email,
+			Name:  u.Name,
+		},
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(currentTime),
 			ExpiresAt: jwt.NewNumericDate(tokenExp),

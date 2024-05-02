@@ -1,7 +1,9 @@
 package server
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -36,6 +38,14 @@ func Run() {
 		JSONDecoder:        json.Unmarshal,
 		JSONEncoder:        json.Marshal,
 		ReadTimeout:        serverTimeout,
+		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
+			code := http.StatusInternalServerError
+			var e *fiber.Error
+			if errors.As(err, &e) {
+				code = e.Code
+			}
+			return ctx.Status(code).JSON(e)
+		},
 	}
 
 	if configs.Runtime.App.Env != localEnv {
@@ -44,7 +54,7 @@ func Run() {
 
 	app := fiber.New(serverConfig)
 	setMiddlewares(app)
-	application.New(app, db)
+	application.New(app, db, jwtMiddleware())
 
 	go func() {
 		addr := fmt.Sprintf("%s:%d", configs.Runtime.App.Host, configs.Runtime.App.Port)

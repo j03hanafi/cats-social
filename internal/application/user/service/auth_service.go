@@ -62,7 +62,6 @@ func (a AuthService) GenerateToken(ctx context.Context, user domain.User) (strin
 	callerInfo := "[AuthService.GenerateToken]"
 	l := logger.FromCtx(ctx).With(zap.String("caller", callerInfo))
 
-	user.Password = ""
 	token, err := security.GenerateAccessToken(user)
 	if err != nil {
 		l.Error("error generating token",

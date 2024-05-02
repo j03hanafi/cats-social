@@ -6,6 +6,10 @@ import (
 	"github.com/oklog/ulid/v2"
 )
 
+const (
+	UserFromToken = "loggedInUser"
+)
+
 var (
 	DuplicateEmailError = errors.New("email already exists")
 	UserNotFoundError   = errors.New("user not found")
