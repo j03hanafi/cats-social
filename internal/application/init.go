@@ -12,6 +12,6 @@ import (
 func New(server *fiber.App, db *pgxpool.Pool) {
 	v1 := server.Group(configs.Runtime.API.BaseURL)
 
-	info.NewModule(v1)
+	info.NewModule(v1, db)
 	user.NewModule(v1, db)
 }

@@ -27,5 +27,7 @@ func Run() {
 	}()
 	zap.ReplaceGlobals(l)
 
+	l.Debug("config loaded", zap.Any("config", configs.Runtime))
+
 	server.Run()
 }

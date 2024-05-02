@@ -7,5 +7,6 @@ import (
 )
 
 type AuthRepositoryContract interface {
-	Register(ctx context.Context, user domain.User) error
+	Create(ctx context.Context, user domain.User) error
+	GetByEmail(ctx context.Context, email string) (domain.User, error)
 }

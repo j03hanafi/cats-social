@@ -7,6 +7,17 @@ import (
 	"go.uber.org/multierr"
 )
 
+const (
+	invalidRequestBodyMessage  = "Invalid Request Body"
+	internalServerErrorMessage = "Internal Server Error"
+	duplicateEmailErrorMessage = "Email already exists"
+	userNotFoundErrorMessage   = "User not found"
+	invalidPasswordMessage     = "Invalid password"
+
+	successRegisterMessage = "User registered successfully"
+	successLoginMessage    = "User logged in successfully"
+)
+
 type baseResponse struct {
 	Message string `json:"message"`
 	Data    any    `json:"data"`
@@ -49,6 +60,37 @@ func (r registerRequest) validate() error {
 	return nil
 }
 
-var invalidRequestBody = baseResponse{
-	Message: "Invalid Request Body",
+type authResponse struct {
+	Email       string `json:"email"`
+	Name        string `json:"name"`
+	AccessToken string `json:"accessToken"`
+}
+
+type loginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func (r loginRequest) validate() error {
+	var errs error
+
+	if r.Email != "" && !govalidator.IsEmail(r.Email) {
+		errs = multierr.Append(errs, errors.New("invalid email format"))
+	}
+	if r.Email == "" {
+		errs = multierr.Append(errs, errors.New("email is required"))
+	}
+
+	if r.Password != "" && len(r.Password) < 5 || len(r.Password) > 15 {
+		errs = multierr.Append(errs, errors.New("password must be between 5 and 15 characters"))
+	}
+	if r.Password == "" {
+		errs = multierr.Append(errs, errors.New("password is required"))
+	}
+
+	if errs != nil {
+		return errs
+	}
+
+	return nil
 }

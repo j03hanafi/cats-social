@@ -30,7 +30,6 @@ type apiCfg struct {
 	BaseURL    string `mapstructure:"BaseURL"`
 	Timeout    int    `mapstructure:"Timeout"`
 	DebugMode  bool   `mapstructure:"DebugMode"`
-	JWTSecret  string `mapstructure:"JWT_SECRET"`
 	BCryptSalt int    `mapstructure:"BCRYPT_SALT"`
 	JWT        jwt    `mapstructure:"JWT"`
 }
