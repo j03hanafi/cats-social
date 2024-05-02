@@ -36,7 +36,7 @@ func readEnv(runtimeViper *viper.Viper) {
 	runtimeViper.SetDefault(dbName, "cats_social")
 	runtimeViper.SetDefault(dbPort, 5432)
 	runtimeViper.SetDefault(dbHost, "localhost")
-	runtimeViper.SetDefault(dbUsername, "postgres")
+	runtimeViper.SetDefault(dbUsername, "cats_social")
 	runtimeViper.SetDefault(dbPassword, "password")
 	runtimeViper.SetDefault(dbParams, []string{"sslmode=disable"})
 	runtimeViper.SetDefault(jwtSecret, "secret")
@@ -76,6 +76,9 @@ func loadConfig(runtimeViper *viper.Viper) (*RuntimeConfig, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%s failed to decode apiConfig: %v\n", callerInfo, err)
 	}
+
+	// because we get jwtSecret from env vars but in config runtime it's nested, we need to manually set it
+	apiConfig.JWT.JWTSecret = runtimeViper.GetString(jwtSecret)
 
 	// set env vars to runtimeConfig before decode from config file
 	runtimeConfig := &RuntimeConfig{

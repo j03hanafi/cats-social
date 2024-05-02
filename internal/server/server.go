@@ -12,7 +12,8 @@ import (
 	"go.uber.org/zap"
 
 	"cats-social/common/configs"
-	"cats-social/internal/domain"
+	"cats-social/common/database"
+	"cats-social/internal/application"
 )
 
 const (
@@ -22,6 +23,9 @@ const (
 func Run() {
 	callerInfo := "[server.Run]"
 	log := zap.L().With(zap.String("caller", callerInfo))
+
+	db := database.NewPGConn()
+	defer db.Close()
 
 	serverTimeout := time.Duration(configs.Runtime.API.Timeout) * time.Second
 	serverConfig := fiber.Config{
@@ -40,7 +44,7 @@ func Run() {
 
 	app := fiber.New(serverConfig)
 	setMiddlewares(app)
-	domain.New(app)
+	application.New(app, db)
 
 	go func() {
 		addr := fmt.Sprintf("%s:%d", configs.Runtime.App.Host, configs.Runtime.App.Port)

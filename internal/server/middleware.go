@@ -10,8 +10,8 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"go.uber.org/zap"
 
+	"cats-social/common/id"
 	"cats-social/common/logger"
-	"cats-social/common/ulid"
 )
 
 const (
@@ -61,7 +61,7 @@ func zapMiddleware() fiber.Handler {
 func requestIDMiddleware() fiber.Handler {
 	return requestid.New(requestid.Config{
 		Generator: func() string {
-			return ulid.New().String()
+			return id.New().String()
 		},
 		ContextKey: requestId,
 	})

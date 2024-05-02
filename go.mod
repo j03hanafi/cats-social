@@ -3,12 +3,17 @@ module cats-social
 go 1.22
 
 require (
+	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
 	github.com/bytedance/sonic v1.11.6
 	github.com/gofiber/contrib/fiberzap/v2 v2.1.3
 	github.com/gofiber/fiber/v2 v2.52.4
+	github.com/jackc/pgx-zap v0.0.0-20221202020421-94b1cb2f889f
+	github.com/jackc/pgx/v5 v5.5.5
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/spf13/viper v1.18.2
+	go.uber.org/multierr v1.11.0
 	go.uber.org/zap v1.27.0
+	golang.org/x/crypto v0.22.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
@@ -20,6 +25,9 @@ require (
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20231201235250-de7065d80cb9 // indirect
+	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/klauspost/compress v1.17.8 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
@@ -42,9 +50,9 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.52.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
-	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.7.0 // indirect
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f // indirect
+	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect

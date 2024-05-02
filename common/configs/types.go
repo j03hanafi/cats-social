@@ -18,11 +18,12 @@ type RuntimeConfig struct {
 }
 
 type appCfg struct {
-	Name    string `mapstructure:"Name"`
-	Host    string `mapstructure:"Host"`
-	Port    int    `mapstructure:"Port"`
-	Version string `mapstructure:"Version"`
-	Env     string `mapstructure:"Env"`
+	Name           string `mapstructure:"Name"`
+	Host           string `mapstructure:"Host"`
+	Port           int    `mapstructure:"Port"`
+	Version        string `mapstructure:"Version"`
+	Env            string `mapstructure:"Env"`
+	ContextTimeout int    `mapsctructure:"ContextTimeout"`
 }
 
 type apiCfg struct {
@@ -31,6 +32,12 @@ type apiCfg struct {
 	DebugMode  bool   `mapstructure:"DebugMode"`
 	JWTSecret  string `mapstructure:"JWT_SECRET"`
 	BCryptSalt int    `mapstructure:"BCRYPT_SALT"`
+	JWT        jwt    `mapstructure:"JWT"`
+}
+
+type jwt struct {
+	Expire    int    `mapstructure:"Expire"`
+	JWTSecret string `mapstructure:"JWT_SECRET"`
 }
 
 type dbCfg struct {

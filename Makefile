@@ -1,7 +1,14 @@
 # Variables
 MAIN_PACKAGE_PATH := ./cmd/api
-BINARY_NAME := trainer-service-backend
-
+BINARY_NAME := cats-social
+PWD := $(shell pwd)
+DB_TYPE := postgres
+DB_NAME := cats_social
+DB_PORT := 5432
+DB_HOST := localhost
+DB_USERNAME := cats_social
+DB_PASSWORD := password
+DB_PARAMS := sslmode=disable
 
 # ==================================================================================== #
 # HELPERS
@@ -12,6 +19,10 @@ BINARY_NAME := trainer-service-backend
 help:
 	@echo 'Usage:'
 	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' |  sed -e 's/^/ /'
+
+.PHONY: confirm
+confirm:
+	@echo -n 'Are you sure? [y/N] ' && read ans && [ $${ans:-N} = y ]
 
 
 # ==================================================================================== #
@@ -78,3 +89,50 @@ watch:
 .PHONY: clean
 clean:
 	rm -f ./tmp/bin/${BINARY_NAME}
+
+
+# ==================================================================================== #
+# DATABASE
+# ==================================================================================== #
+
+## db/connect: run the local database from docker compose
+.PHONY: db/connect
+db/connect:
+	docker compose up -d postgres-cats-social
+
+## migrate/create name=$1: create a new migration
+.PHONY: migrate/create
+migrate/create:
+	@echo "---Creating migration files---"
+	go run -tags '$(DB_TYPE)' github.com/golang-migrate/migrate/v4/cmd/migrate@latest \
+ 		create -ext sql -dir $(PWD)/migrations -seq -digits 5 $(name)
+
+## migrate/up n=$1: run the up migration
+.PHONY: migrate/up
+migrate/up:
+	go run -tags '$(DB_TYPE)' github.com/golang-migrate/migrate/v4/cmd/migrate@latest \
+ 		-database $(DB_TYPE)://$(DB_USERNAME):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?$(DB_PARAMS) -path $(PWD)/migrations up $(n)
+
+## migrate/down n=$1: run the down migration
+.PHONY: migrate/down
+migrate/down: confirm
+	go run -tags '$(DB_TYPE)' github.com/golang-migrate/migrate/v4/cmd/migrate@latest \
+ 		-database $(DB_TYPE)://$(DB_USERNAME):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?$(DB_PARAMS) -path $(PWD)/migrations down $(n)
+
+## migrate/goto version=$1: migrate to a specific version number
+.PHONY: migrate/goto
+migrate/goto: confirm
+	go run -tags '$(DB_TYPE)' github.com/golang-migrate/migrate/v4/cmd/migrate@latest \
+ 		-database $(DB_TYPE)://$(DB_USERNAME):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?$(DB_PARAMS) -path $(PWD)/migrations goto $(version)
+
+## migrate/force version=$1: force a migration by version
+.PHONY: migrate/force
+migrate/force: confirm
+	go run -tags '$(DB_TYPE)' github.com/golang-migrate/migrate/v4/cmd/migrate@latest \
+ 		-database $(DB_TYPE)://$(DB_USERNAME):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?$(DB_PARAMS) -path $(PWD)/migrations force $(version)
+
+## migrate/version: print the current migration version
+.PHONY: migrate/version
+migrate/version:
+	go run -tags '$(DB_TYPE)' github.com/golang-migrate/migrate/v4/cmd/migrate@latest \
+	 	-database $(DB_TYPE)://$(DB_USERNAME):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?$(DB_PARAMS) -path $(PWD)/migrations version
