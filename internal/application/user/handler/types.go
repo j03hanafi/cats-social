@@ -8,8 +8,6 @@ import (
 )
 
 const (
-	invalidRequestBodyMessage  = "Invalid Request Body"
-	internalServerErrorMessage = "Internal Server Error"
 	duplicateEmailErrorMessage = "Email already exists"
 	userNotFoundErrorMessage   = "User not found"
 	invalidPasswordMessage     = "Invalid password"

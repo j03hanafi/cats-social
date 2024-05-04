@@ -39,7 +39,7 @@ func (h authHandler) Register(c *fiber.Ctx) error {
 			zap.Error(err),
 		)
 		res = baseResponse{
-			Message: invalidRequestBodyMessage,
+			Message: domain.InvalidRequestBodyMessage,
 			Data: fiber.Map{
 				"error": err.Error(),
 			},
@@ -52,7 +52,7 @@ func (h authHandler) Register(c *fiber.Ctx) error {
 			zap.Error(err),
 		)
 		res = baseResponse{
-			Message: invalidRequestBodyMessage,
+			Message: domain.InvalidRequestBodyMessage,
 			Data: fiber.Map{
 				"error": err.Error(),
 			},
@@ -84,7 +84,7 @@ func (h authHandler) Register(c *fiber.Ctx) error {
 			zap.Error(err),
 		)
 		res = baseResponse{
-			Message: internalServerErrorMessage,
+			Message: domain.InternalServerErrorMessage,
 			Data: fiber.Map{
 				"error": err.Error(),
 			},
@@ -98,7 +98,7 @@ func (h authHandler) Register(c *fiber.Ctx) error {
 			zap.Error(err),
 		)
 		res = baseResponse{
-			Message: internalServerErrorMessage,
+			Message: domain.InternalServerErrorMessage,
 			Data: fiber.Map{
 				"error": err.Error(),
 			},
@@ -129,7 +129,7 @@ func (h authHandler) Login(c *fiber.Ctx) error {
 			zap.Error(err),
 		)
 		res = baseResponse{
-			Message: invalidRequestBodyMessage,
+			Message: domain.InvalidRequestBodyMessage,
 			Data: fiber.Map{
 				"error": err.Error(),
 			},
@@ -142,7 +142,7 @@ func (h authHandler) Login(c *fiber.Ctx) error {
 			zap.Error(err),
 		)
 		res = baseResponse{
-			Message: invalidRequestBodyMessage,
+			Message: domain.InvalidRequestBodyMessage,
 			Data: fiber.Map{
 				"error": err.Error(),
 			},
@@ -189,7 +189,7 @@ func (h authHandler) Login(c *fiber.Ctx) error {
 				zap.Error(err),
 			)
 			res = baseResponse{
-				Message: internalServerErrorMessage,
+				Message: domain.InternalServerErrorMessage,
 				Data: fiber.Map{
 					"error": err.Error(),
 				},
@@ -205,7 +205,7 @@ func (h authHandler) Login(c *fiber.Ctx) error {
 			zap.Error(err),
 		)
 		res = baseResponse{
-			Message: internalServerErrorMessage,
+			Message: domain.InternalServerErrorMessage,
 			Data: fiber.Map{
 				"error": err.Error(),
 			},

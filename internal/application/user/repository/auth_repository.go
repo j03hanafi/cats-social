@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 
+	"cats-social/common/id"
 	"cats-social/common/logger"
 	"cats-social/internal/domain"
 )
@@ -25,12 +26,12 @@ func NewAuthRepository(db *pgxpool.Pool) *AuthRepository {
 	}
 }
 
-func (a AuthRepository) Create(ctx context.Context, dUser domain.User) error {
+func (a AuthRepository) Create(ctx context.Context, dUser domain.User) (domain.User, error) {
 	callerInfo := "[AuthRepository.Create]"
 	l := logger.FromCtx(ctx).With(zap.String("caller", callerInfo))
 
 	mUser := user{
-		ID:        dUser.ID,
+		ID:        id.New(),
 		Email:     dUser.Email,
 		Name:      dUser.Name,
 		Password:  dUser.Password,
@@ -44,7 +45,7 @@ func (a AuthRepository) Create(ctx context.Context, dUser domain.User) error {
 	tx, err := a.db.Begin(ctx)
 	if err != nil {
 		l.Error("failed to begin transaction", zap.Error(err))
-		return err
+		return dUser, err
 	}
 	defer func() {
 		_ = tx.Rollback(ctx)
@@ -66,19 +67,20 @@ func (a AuthRepository) Create(ctx context.Context, dUser domain.User) error {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 			l.Error("user already exists", zap.Error(err))
-			return domain.DuplicateEmailError
+			return dUser, domain.DuplicateEmailError
 		}
 		l.Error("failed to insert user", zap.Error(err))
-		return err
+		return dUser, err
 	}
 
 	err = tx.Commit(ctx)
 	if err != nil {
 		l.Error("failed to commit transaction", zap.Error(err))
-		return err
+		return dUser, err
 	}
 
-	return nil
+	dUser.ID = mUser.ID
+	return dUser, nil
 }
 
 func (a AuthRepository) GetByEmail(ctx context.Context, email string) (domain.User, error) {

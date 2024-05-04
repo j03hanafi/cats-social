@@ -26,8 +26,11 @@ func Run() {
 	callerInfo := "[server.Run]"
 	log := zap.L().With(zap.String("caller", callerInfo))
 
-	db := database.NewPGConn()
+	db, err := database.NewPGConn()
 	defer db.Close()
+	if err != nil {
+		log.Panic("Failed to connect to database", zap.Error(err))
+	}
 
 	serverTimeout := time.Duration(configs.Runtime.API.Timeout) * time.Second
 	serverConfig := fiber.Config{
@@ -38,6 +41,7 @@ func Run() {
 		JSONDecoder:        json.Unmarshal,
 		JSONEncoder:        json.Marshal,
 		ReadTimeout:        serverTimeout,
+		ReduceMemoryUsage:  true,
 		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
 			code := http.StatusInternalServerError
 			var e *fiber.Error
@@ -59,7 +63,7 @@ func Run() {
 	go func() {
 		addr := fmt.Sprintf("%s:%d", configs.Runtime.App.Host, configs.Runtime.App.Port)
 		if err := app.Listen(addr); err != nil {
-			log.DPanic("Server Error", zap.Error(err))
+			log.Panic("Server Error", zap.Error(err))
 		}
 	}()
 
@@ -72,9 +76,9 @@ func Run() {
 	<-c
 	log.Info("shutting down gracefully, press Ctrl+C again to force")
 
-	err := app.ShutdownWithTimeout(serverTimeout)
+	err = app.ShutdownWithTimeout(serverTimeout)
 	if err != nil {
-		log.DPanic("Server forced to shutdown", zap.Error(err))
+		log.Panic("Server forced to shutdown", zap.Error(err))
 	}
 
 	log.Info("Server was successful shutdown")

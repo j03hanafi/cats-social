@@ -14,7 +14,7 @@ import (
 	"cats-social/common/configs"
 )
 
-func NewPGConn() *pgxpool.Pool {
+func NewPGConn() (*pgxpool.Pool, error) {
 	ctx, cancel := context.WithTimeout(
 		context.Background(),
 		time.Duration(configs.Runtime.App.ContextTimeout)*time.Second,
@@ -38,7 +38,7 @@ func NewPGConn() *pgxpool.Pool {
 		l.Error("error parsing database config",
 			zap.Error(err),
 		)
-		return nil
+		return nil, err
 	}
 
 	poolLog := pgxZap.NewLogger(zap.L())
@@ -56,17 +56,17 @@ func NewPGConn() *pgxpool.Pool {
 		l.Error("error creating database pool",
 			zap.Error(err),
 		)
-		return nil
+		return nil, err
 	}
 
 	if err = pool.Ping(ctx); err != nil {
 		l.Error("error pinging database",
 			zap.Error(err),
 		)
-		return nil
+		return nil, err
 	} else {
 		l.Info("connected to database")
 	}
 
-	return pool
+	return pool, nil
 }

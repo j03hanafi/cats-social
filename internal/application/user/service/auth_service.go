@@ -6,7 +6,6 @@ import (
 
 	"go.uber.org/zap"
 
-	"cats-social/common/id"
 	"cats-social/common/logger"
 	"cats-social/common/security"
 	"cats-social/internal/application/user/repository"
@@ -39,17 +38,17 @@ func (a AuthService) Register(ctx context.Context, user domain.User) (domain.Use
 		l.Error("error hashing password",
 			zap.Error(err),
 		)
-		return domain.User{}, err
+		return user, err
 	}
 
 	user.Password = password
-	user.ID = id.New()
 
-	if err = a.authRepository.Create(ctx, user); err != nil {
+	user, err = a.authRepository.Create(ctx, user)
+	if err != nil {
 		l.Error("error register user",
 			zap.Error(err),
 		)
-		return domain.User{}, err
+		return user, err
 	}
 
 	return user, nil
