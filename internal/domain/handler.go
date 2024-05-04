@@ -88,14 +88,8 @@ func (p *QueryParam) validateAgeInMonth() error {
 		return nil
 	}
 
-	// Check if the whole string is numeric (case: "%d")
-	if _, err := strconv.Atoi(p.AgeInMonth); err == nil {
-		p.AgeInMonth = "=" + p.AgeInMonth
-		return nil
-	}
-
-	// Check for '>' or '<' followed by a numeric string (case: ">%d" or "<%d")
-	if len(p.AgeInMonth) > 1 && p.AgeInMonth[0] == '>' || p.AgeInMonth[0] == '<' {
+	// Check for '>' | '<' | '=' followed by a numeric string
+	if len(p.AgeInMonth) > 1 && p.AgeInMonth[0] == '>' || p.AgeInMonth[0] == '<' || p.AgeInMonth[0] == '=' {
 		if _, err := strconv.Atoi(p.AgeInMonth[1:]); err == nil {
 			return nil
 		}

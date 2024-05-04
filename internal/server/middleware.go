@@ -32,7 +32,7 @@ func setMiddlewares(app *fiber.App) {
 	app.Use(zapMiddleware())
 	app.Use(requestIDMiddleware())
 	app.Use(loggerMiddleware())
-	app.Use(cacheMiddleware())
+	// app.Use(cacheMiddleware())
 	app.Use(eTagMiddleware())
 }
 

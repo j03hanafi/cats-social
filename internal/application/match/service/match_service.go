@@ -45,7 +45,10 @@ func (m MatchService) NewMatch(ctx context.Context, match domain.Match, userID u
 	l := logger.FromCtx(ctx).With(zap.String("caller", callerInfo))
 
 	// Check matchCatId is exist
-	cats, err := m.catRepository.Get(ctx, userID, domain.QueryParam{ID: match.MatchCatID}, false)
+	cats, err := m.catRepository.Get(ctx, userID, domain.QueryParam{
+		ID:    match.MatchCatID,
+		Owned: domain.FalseBool,
+	}, false)
 	if err != nil {
 		l.Error("error get cat", zap.Error(err))
 		return match, err
