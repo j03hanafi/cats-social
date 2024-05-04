@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/oklog/ulid/v2"
 	"go.uber.org/zap"
 
 	"cats-social/common/id"
@@ -104,6 +105,32 @@ func (a AuthRepository) GetByEmail(ctx context.Context, email string) (domain.Us
 		Email:    mUser.Email,
 		Name:     mUser.Name,
 		Password: mUser.Password,
+	}
+
+	return dUser, nil
+}
+
+func (a AuthRepository) Get(ctx context.Context, userID ulid.ULID) (domain.User, error) {
+	callerInfo := "[AuthRepository.Get]"
+	l := logger.FromCtx(ctx).With(zap.String("caller", callerInfo))
+
+	var mUser user
+	query := `SELECT email, name, created_at FROM users WHERE id = $1`
+	err := a.db.QueryRow(ctx, query, userID).Scan(&mUser.Email, &mUser.Name, &mUser.CreatedAt)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			l.Error("user not found", zap.Error(err))
+			return domain.User{}, domain.UserNotFoundError
+		}
+		l.Error("failed to get user", zap.Error(err))
+		return domain.User{}, err
+	}
+
+	dUser := domain.User{
+		ID:        userID,
+		Name:      mUser.Name,
+		Email:     mUser.Email,
+		CreatedAt: mUser.CreatedAt,
 	}
 
 	return dUser, nil

@@ -363,6 +363,7 @@ func (c CatRepository) Update(ctx context.Context, dCat domain.Cat) (domain.Cat,
 		Sex:         string(dCat.Sex),
 		AgeInMonth:  dCat.AgeInMonth,
 		Description: dCat.Description,
+		HasMatched:  dCat.HasMatched,
 		UpdatedAt:   time.Now(),
 	}
 
@@ -372,24 +373,26 @@ func (c CatRepository) Update(ctx context.Context, dCat domain.Cat) (domain.Cat,
 		return dCat, err
 	}
 
-	mCatImages := make([]catImages, len(dCat.ImageUrls))
-	for i, imageUrl := range dCat.ImageUrls {
-		mCatImages[i] = catImages{
-			ID:        id.New(),
-			ImageURL:  imageUrl,
-			CatID:     mCat.ID,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-			DeletedAt: sql.NullTime{
-				Valid: false,
-			},
+	if len(dCat.ImageUrls) != 0 {
+		mCatImages := make([]catImages, len(dCat.ImageUrls))
+		for i, imageUrl := range dCat.ImageUrls {
+			mCatImages[i] = catImages{
+				ID:        id.New(),
+				ImageURL:  imageUrl,
+				CatID:     mCat.ID,
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+				DeletedAt: sql.NullTime{
+					Valid: false,
+				},
+			}
 		}
-	}
 
-	err = c.updateCatImages(ctx, tx, mCatImages)
-	if err != nil {
-		l.Error("failed to update cat images", zap.Error(err))
-		return dCat, err
+		err = c.updateCatImages(ctx, tx, mCatImages)
+		if err != nil {
+			l.Error("failed to update cat images", zap.Error(err))
+			return dCat, err
+		}
 	}
 
 	err = tx.Commit(ctx)
@@ -405,7 +408,7 @@ func (c CatRepository) updateCat(ctx context.Context, tx pgx.Tx, mCat cat) error
 	callerInfo := "[CatRepository.updateCat]"
 	l := logger.FromCtx(ctx).With(zap.String("caller", callerInfo))
 
-	updateQuery := `UPDATE cats SET name = $1, race = $2, sex = $3, age_in_month = $4, description = $5, updated_at = $6 WHERE id = $7`
+	updateQuery := `UPDATE cats SET name = $1, race = $2, sex = $3, age_in_month = $4, description = $5, has_matched = $6, updated_at = $7 WHERE id = $8`
 
 	_, err := tx.Exec(
 		ctx,
@@ -415,6 +418,7 @@ func (c CatRepository) updateCat(ctx context.Context, tx pgx.Tx, mCat cat) error
 		mCat.Sex,
 		mCat.AgeInMonth,
 		mCat.Description,
+		mCat.HasMatched,
 		mCat.UpdatedAt,
 		mCat.ID,
 	)

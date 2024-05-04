@@ -2,6 +2,7 @@ package domain
 
 import (
 	"errors"
+	"time"
 
 	"github.com/oklog/ulid/v2"
 )
@@ -17,8 +18,9 @@ var (
 )
 
 type User struct {
-	ID       ulid.ULID
-	Email    string
-	Name     string
-	Password string
+	ID        ulid.ULID
+	Email     string
+	Name      string
+	Password  string
+	CreatedAt time.Time
 }
