@@ -1,0 +1,18 @@
+version: "3.9"
+services:
+  postgres-cats-social:
+    image: "postgres:latest"
+    environment:
+      - POSTGRES_USER=cats_social
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    #   Set a volume for data and initial sql script
+    #   May configure initial db for future demo
+    volumes:
+      - "pgdata_cats-social:/var/lib/postgresql/data"
+      # - ./init:/docker-entrypoint-initdb.d/
+    command: [ "postgres", "-c", "log_statement=all" ]
+
+volumes:
+  pgdata_cats-social:

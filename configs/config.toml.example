@@ -1,0 +1,22 @@
+[App]
+    Name = "cats-social"
+    Host = ""
+    Port = 8080
+    Version = "1.0.0"
+    Env = "dev"
+    ContextTimeout = 30
+[API]
+    BaseURL = "/v1"
+    Timeout = 60
+    DebugMode = true
+    BCRYPT_SALT = 8
+    [API.JWT]
+        Expire = 28800
+        JWT_SECRET = "secret-toml"
+[DB]
+    DB_NAME = "cats_social"
+    DB_PORT = 5432
+    DB_HOST = "localhost"
+    DB_USERNAME = "cats_social"
+    DB_PASSWORD = "password"
+    DB_PARAMS = ["sslmode=disable"]
