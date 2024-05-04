@@ -343,18 +343,27 @@ func (c CatRepository) getImages(ctx context.Context, cats []domain.Cat) (err er
 	return nil
 }
 
-func (c CatRepository) Update(ctx context.Context, dCat domain.Cat) (domain.Cat, error) {
+func (c CatRepository) Update(ctx context.Context, dCat domain.Cat, txs ...pgx.Tx) (domain.Cat, pgx.Tx, error) {
 	callerInfo := "[CatRepository.Update]"
 	l := logger.FromCtx(ctx).With(zap.String("caller", callerInfo))
 
-	tx, err := c.db.Begin(ctx)
-	if err != nil {
-		l.Error("failed to begin transaction", zap.Error(err))
-		return dCat, err
+	var (
+		tx  pgx.Tx
+		err error
+	)
+
+	if len(txs) == 0 {
+		tx, err = c.db.Begin(ctx)
+		if err != nil {
+			l.Error("failed to begin transaction", zap.Error(err))
+			return dCat, tx, err
+		}
+		defer func() {
+			_ = tx.Rollback(ctx)
+		}()
+	} else {
+		tx = txs[0]
 	}
-	defer func() {
-		_ = tx.Rollback(ctx)
-	}()
 
 	mCat := cat{
 		ID:          dCat.ID,
@@ -370,7 +379,7 @@ func (c CatRepository) Update(ctx context.Context, dCat domain.Cat) (domain.Cat,
 	err = c.updateCat(ctx, tx, mCat)
 	if err != nil {
 		l.Error("failed to update cat", zap.Error(err))
-		return dCat, err
+		return dCat, tx, err
 	}
 
 	if len(dCat.ImageUrls) != 0 {
@@ -391,17 +400,19 @@ func (c CatRepository) Update(ctx context.Context, dCat domain.Cat) (domain.Cat,
 		err = c.updateCatImages(ctx, tx, mCatImages)
 		if err != nil {
 			l.Error("failed to update cat images", zap.Error(err))
-			return dCat, err
+			return dCat, tx, err
 		}
 	}
 
-	err = tx.Commit(ctx)
-	if err != nil {
-		l.Error("failed to commit transaction", zap.Error(err))
-		return dCat, err
+	if len(txs) == 0 {
+		err = tx.Commit(ctx)
+		if err != nil {
+			l.Error("failed to commit transaction", zap.Error(err))
+			return dCat, tx, err
+		}
 	}
 
-	return dCat, nil
+	return dCat, tx, nil
 }
 
 func (c CatRepository) updateCat(ctx context.Context, tx pgx.Tx, mCat cat) error {

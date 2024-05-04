@@ -86,7 +86,7 @@ func (m MatchRepository) NewMatch(ctx context.Context, dMatch domain.Match) (dom
 }
 
 func (m MatchRepository) HasMatched(ctx context.Context, dMatch domain.Match) (bool, error) {
-	callerInfo := "[MatchRepository.FindMatch]"
+	callerInfo := "[MatchRepository.HasMatched]"
 	l := logger.FromCtx(ctx).With(zap.String("caller", callerInfo))
 
 	var mMatch match
@@ -225,20 +225,33 @@ func (m MatchRepository) Get(ctx context.Context, matchID ulid.ULID) (domain.Det
 	}, nil
 }
 
-func (m MatchRepository) DeleteExceptApproved(ctx context.Context, userID, matchID ulid.ULID) error {
+func (m MatchRepository) DeleteExceptApproved(
+	ctx context.Context,
+	userID, matchID ulid.ULID,
+	txs ...pgx.Tx,
+) (pgx.Tx, error) {
 	callerInfo := "[MatchRepository.DeleteExceptApproved]"
 	l := logger.FromCtx(ctx).With(zap.String("caller", callerInfo))
 
-	tx, err := m.db.Begin(ctx)
-	if err != nil {
-		l.Error("error starting transaction",
-			zap.Error(err),
-		)
-		return err
+	var (
+		tx  pgx.Tx
+		err error
+	)
+
+	if len(txs) == 0 {
+		tx, err = m.db.Begin(ctx)
+		if err != nil {
+			l.Error("error starting transaction",
+				zap.Error(err),
+			)
+			return tx, err
+		}
+		defer func() {
+			_ = tx.Rollback(ctx)
+		}()
+	} else {
+		tx = txs[0]
 	}
-	defer func() {
-		_ = tx.Rollback(ctx)
-	}()
 
 	deleteQuery := `UPDATE matches SET deleted_at = $1
 		FROM cats as r, cats as i
@@ -250,16 +263,18 @@ func (m MatchRepository) DeleteExceptApproved(ctx context.Context, userID, match
 		l.Error("error deleting data",
 			zap.Error(err),
 		)
-		return err
+		return tx, err
 	}
 
-	err = tx.Commit(ctx)
-	if err != nil {
-		l.Error("failed to commit transaction", zap.Error(err))
-		return err
+	if len(txs) == 0 {
+		err = tx.Commit(ctx)
+		if err != nil {
+			l.Error("failed to commit transaction", zap.Error(err))
+			return tx, err
+		}
 	}
 
-	return nil
+	return tx, nil
 }
 
 func (m MatchRepository) Delete(ctx context.Context, matchID ulid.ULID) error {
@@ -290,6 +305,36 @@ func (m MatchRepository) Delete(ctx context.Context, matchID ulid.ULID) error {
 	err = tx.Commit(ctx)
 	if err != nil {
 		l.Error("failed to commit transaction", zap.Error(err))
+		return err
+	}
+
+	return nil
+}
+
+func (m MatchRepository) TxBegin(ctx context.Context) (pgx.Tx, error) {
+	callerInfo := "[MatchRepository.TxBegin]"
+	l := logger.FromCtx(ctx).With(zap.String("caller", callerInfo))
+
+	tx, err := m.db.Begin(ctx)
+	if err != nil {
+		l.Error("error starting transaction",
+			zap.Error(err),
+		)
+		return nil, err
+	}
+
+	return tx, nil
+}
+
+func (m MatchRepository) TxCommit(ctx context.Context, tx pgx.Tx) error {
+	callerInfo := "[MatchRepository.TxCommit]"
+	l := logger.FromCtx(ctx).With(zap.String("caller", callerInfo))
+
+	err := tx.Commit(ctx)
+	if err != nil {
+		l.Error("failed to commit transaction",
+			zap.Error(err),
+		)
 		return err
 	}
 

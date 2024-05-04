@@ -8,19 +8,26 @@ import (
 	"go.uber.org/zap"
 
 	"cats-social/common/logger"
-	"cats-social/internal/application/cat/repository"
+	catRepo "cats-social/internal/application/cat/repository"
+	matchRepo "cats-social/internal/application/match/repository"
 	"cats-social/internal/domain"
 )
 
 type CatService struct {
-	catRepository  repository.CatRepositoryContract
-	contextTimeout time.Duration
+	catRepository   catRepo.CatRepositoryContract
+	matchRepository matchRepo.MatchRepositoryContract
+	contextTimeout  time.Duration
 }
 
-func NewCatService(timeout time.Duration, catRepository repository.CatRepositoryContract) *CatService {
+func NewCatService(
+	timeout time.Duration,
+	catRepository catRepo.CatRepositoryContract,
+	matchRepository matchRepo.MatchRepositoryContract,
+) *CatService {
 	catService := &CatService{
-		catRepository:  catRepository,
-		contextTimeout: timeout,
+		catRepository:   catRepository,
+		matchRepository: matchRepository,
+		contextTimeout:  timeout,
 	}
 
 	return catService
@@ -82,6 +89,21 @@ func (c CatService) UpdateCat(ctx context.Context, updatedCat domain.Cat) (domai
 	}
 
 	cat := cats[0]
+
+	if cat.Sex != updatedCat.Sex {
+		foundMatches := make([]domain.DetailMatch, 0)
+		foundMatches, err = c.matchRepository.GetDetailMatches(ctx, updatedCat.UserID)
+		if err != nil {
+			l.Error("error get matches", zap.Error(err))
+			return cat, err
+		}
+		if len(foundMatches) > 0 {
+			err = domain.ErrCatAlreadyMatched
+			l.Error("cat already requested to match", zap.Error(domain.ErrCatAlreadyMatched))
+			return cat, err
+		}
+	}
+
 	cat.Name = updatedCat.Name
 	cat.Race = updatedCat.Race
 	cat.Sex = updatedCat.Sex
@@ -89,9 +111,18 @@ func (c CatService) UpdateCat(ctx context.Context, updatedCat domain.Cat) (domai
 	cat.Description = updatedCat.Description
 	cat.ImageUrls = updatedCat.ImageUrls
 
-	// TODO: Check for match before changing sex
+	foundMatches, err := c.matchRepository.GetDetailMatches(ctx, updatedCat.UserID)
+	if err != nil {
+		l.Error("error get matches", zap.Error(err))
+		return cat, err
+	}
+	if len(foundMatches) > 0 {
+		err = domain.ErrCatAlreadyMatched
+		l.Error("cat already requested to match", zap.Error(domain.ErrCatAlreadyMatched))
+		return cat, err
+	}
 
-	cat, err = c.catRepository.Update(ctx, cat)
+	cat, _, err = c.catRepository.Update(ctx, cat)
 	if err != nil {
 		l.Error("error update cat", zap.Error(err))
 		return cat, err

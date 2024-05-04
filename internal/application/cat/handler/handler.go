@@ -263,6 +263,18 @@ func (h catHandler) UpdateCat(c *fiber.Ctx) error {
 		}
 		return c.Status(http.StatusNotFound).JSON(res)
 
+	case errors.Is(err, domain.ErrCatAlreadyMatched):
+		l.Info("cat already requested to match",
+			zap.Error(err),
+		)
+		res = baseResponse{
+			Message: domain.InvalidRequestBodyMessage,
+			Data: fiber.Map{
+				"error": err.Error(),
+			},
+		}
+		return c.Status(http.StatusBadRequest).JSON(res)
+
 	case err != nil:
 		l.Error("error updating cat",
 			zap.Error(err),

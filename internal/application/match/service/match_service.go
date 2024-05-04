@@ -242,25 +242,40 @@ func (m MatchService) ApproveMatch(ctx context.Context, matchID, userID ulid.ULI
 		return err
 	}
 
+	tx, err := m.matchRepository.TxBegin(ctx)
+	if err != nil {
+		l.Error("error begin transaction", zap.Error(err))
+		return err
+	}
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
+
 	// Update matchCatId and userCatId hasMatched status
 	receiverCat.HasMatched = true
-	receiverCat, err = m.catRepository.Update(ctx, receiverCat)
+	receiverCat, tx, err = m.catRepository.Update(ctx, receiverCat, tx)
 	if err != nil {
 		l.Error("error update match cat", zap.Error(err))
 		return err
 	}
 
 	issuerCat.HasMatched = true
-	issuerCat, err = m.catRepository.Update(ctx, issuerCat)
+	issuerCat, tx, err = m.catRepository.Update(ctx, issuerCat, tx)
 	if err != nil {
 		l.Error("error update user cat", zap.Error(err))
 		return err
 	}
 
 	// Update match.deleted_at where userID is the issuer and the receiver except the matchID
-	err = m.matchRepository.DeleteExceptApproved(ctx, userID, matchID)
+	tx, err = m.matchRepository.DeleteExceptApproved(ctx, userID, matchID, tx)
 	if err != nil {
 		l.Error("error delete match", zap.Error(err))
+		return err
+	}
+
+	err = m.matchRepository.TxCommit(ctx, tx)
+	if err != nil {
+		l.Error("error commit transaction", zap.Error(err))
 		return err
 	}
 
