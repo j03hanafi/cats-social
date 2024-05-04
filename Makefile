@@ -136,3 +136,13 @@ migrate/force: confirm
 migrate/version:
 	go run -tags '$(DB_TYPE)' github.com/golang-migrate/migrate/v4/cmd/migrate@latest \
 	 	-database $(DB_TYPE)://$(DB_USERNAME):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?$(DB_PARAMS) -path $(PWD)/migrations version
+
+
+# ==================================================================================== #
+# OPERATIONS
+# ==================================================================================== #
+
+## production/build: build the application for production
+.PHONY: production/build
+production/build: confirm tidy audit
+	GOOS=linux GOARCH=amd64 go build -ldflags='-s' -o=./${BINARY_NAME} ${MAIN_PACKAGE_PATH}
