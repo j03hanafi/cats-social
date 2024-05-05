@@ -66,6 +66,7 @@ func Run() {
 	app := fiber.New(serverConfig)
 	setMiddlewares(app)
 	application.New(app, db, jwtMiddleware())
+	log.Debug("Server Config", zap.Any("Config", app.Config()))
 
 	go func() {
 		addr := fmt.Sprintf("%s:%d", configs.Runtime.App.Host, configs.Runtime.App.Port)

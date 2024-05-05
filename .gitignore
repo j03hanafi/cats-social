@@ -3,3 +3,5 @@
 /logs
 /cats-social
 *.toml
+/bin
+/configs/certs
