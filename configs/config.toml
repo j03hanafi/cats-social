@@ -4,13 +4,13 @@
     Port = 8080
     Version = "1.0.0"
     Env = "local"
-    ContextTimeout = 10
+    ContextTimeout = 55
 [API]
     BaseURL = "/v1"
-    Timeout = 15
+    Timeout = 60
     DebugMode = true
 #    BCRYPT_SALT = 8
-    Parser = "sonic"
+    Parser = "go-json"
     [API.JWT]
         Expire = 28800
 #        JWT_SECRET = "secret-toml"
