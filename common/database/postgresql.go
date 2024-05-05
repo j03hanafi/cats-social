@@ -25,7 +25,7 @@ func NewPGConn() (*pgxpool.Pool, error) {
 	callerInfo := "[database.NewPGConn]"
 	l := zap.L().With(zap.String("caller", callerInfo))
 
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s %s pool_max_conns=%d",
+	_ = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s %s pool_max_conns=%d",
 		configs.Runtime.DB.Host,
 		configs.Runtime.DB.Port,
 		configs.Runtime.DB.Username,
@@ -35,7 +35,17 @@ func NewPGConn() (*pgxpool.Pool, error) {
 		runtime.NumCPU()*configs.Runtime.DB.MaxConnPoolMultiplier,
 	)
 
-	config, err := pgxpool.ParseConfig(dsn)
+	url := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?%s&pool_max_conns=%d",
+		configs.Runtime.DB.Username,
+		configs.Runtime.DB.Password,
+		configs.Runtime.DB.Host,
+		configs.Runtime.DB.Port,
+		configs.Runtime.DB.Name,
+		strings.Join(configs.Runtime.DB.Params, " "),
+		runtime.NumCPU()*configs.Runtime.DB.MaxConnPoolMultiplier,
+	)
+
+	config, err := pgxpool.ParseConfig(url)
 	if err != nil {
 		l.Error("error parsing database config",
 			zap.Error(err),
