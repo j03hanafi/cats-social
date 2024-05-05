@@ -3,13 +3,14 @@
     Host = ""
     Port = 8080
     Version = "1.0.0"
-    Env = "local"
-    ContextTimeout = 30
+    Env = "dev"
+    ContextTimeout = 10
 [API]
     BaseURL = "/v1"
-    Timeout = 60
+    Timeout = 15
     DebugMode = true
 #    BCRYPT_SALT = 8
+    Parser = "go-json"
     [API.JWT]
         Expire = 28800
 #        JWT_SECRET = "secret-toml"
@@ -20,3 +21,4 @@
 #    DB_USERNAME = "cats_social"
 #    DB_PASSWORD = "password"
 #    DB_PARAMS = ["sslmode=disable"]
+    MaxConnPoolMultiplier = 5

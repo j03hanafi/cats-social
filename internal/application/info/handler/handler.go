@@ -72,7 +72,7 @@ func (h infoHandler) Health(c *fiber.Ctx) error {
 	dbData := fiber.Map{
 		"status":    "connected",
 		"totalIdle": len(conns),
-		"stat":      h.db.Stat().MaxConns(),
+		"maxConn":   h.db.Stat().MaxConns(),
 	}
 
 	if configs.Runtime.API.DebugMode {

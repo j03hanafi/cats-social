@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/bytedance/sonic"
 	"github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
@@ -19,7 +20,8 @@ import (
 )
 
 const (
-	localEnv = "local"
+	localEnv   = "local"
+	sonicParse = "sonic"
 )
 
 func Run() {
@@ -54,6 +56,11 @@ func Run() {
 
 	if configs.Runtime.App.Env != localEnv {
 		serverConfig.Prefork = true
+	}
+
+	if configs.Runtime.API.Parser == sonicParse {
+		serverConfig.JSONDecoder = sonic.Unmarshal
+		serverConfig.JSONEncoder = sonic.Marshal
 	}
 
 	app := fiber.New(serverConfig)
