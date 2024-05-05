@@ -78,7 +78,7 @@ run: build
 .PHONY: watch
 watch:
 	go run github.com/cosmtrek/air@latest \
-		--build.cmd "make build" --build.bin "./tmp/${BINARY_NAME}" --build.delay "100" \
+		--build.cmd "make build" --build.bin "./tmp/bin/${BINARY_NAME}" --build.delay "100" \
 		--build.exclude_dir "" \
 		--build.include_ext "go, mod, tpl, tmpl, html, env" \
 		--build.send_interrupt "true" \
