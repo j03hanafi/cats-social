@@ -78,7 +78,7 @@ run: build
 .PHONY: watch
 watch:
 	go run github.com/cosmtrek/air@latest \
-		--build.cmd "make build" --build.bin "./tmp/bin/${BINARY_NAME}" --build.delay "100" \
+		--build.cmd "make build" --build.bin "./tmp/${BINARY_NAME}" --build.delay "100" \
 		--build.exclude_dir "" \
 		--build.include_ext "go, mod, tpl, tmpl, html, env" \
 		--build.send_interrupt "true" \
@@ -145,4 +145,4 @@ migrate/version:
 ## production/build: build the application for production
 .PHONY: production/build
 production/build: confirm tidy audit
-	GOOS=linux GOARCH=amd64 go build -ldflags='-s' -o=./${BINARY_NAME} ${MAIN_PACKAGE_PATH}
+	GOOS=linux GOARCH=amd64 go build -ldflags='-s' -o=./bin/${BINARY_NAME} ${MAIN_PACKAGE_PATH}

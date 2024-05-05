@@ -70,5 +70,6 @@ func NewPGConn() (*pgxpool.Pool, error) {
 		l.Info("connected to database")
 	}
 
+	l.Debug("Database Config", zap.Any("Config", pool.Config().ConnString()))
 	return pool, nil
 }

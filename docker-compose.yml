@@ -12,7 +12,7 @@ services:
     volumes:
       - "pgdata_cats-social:/var/lib/postgresql/data"
       # - ./init:/docker-entrypoint-initdb.d/
-    command: [ "postgres", "-c", "log_statement=all" ]
+    command: [ "postgres", "-c", "log_statement=all", "-c", "max_connections=200" ]
 
 volumes:
   pgdata_cats-social:

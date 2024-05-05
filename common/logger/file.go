@@ -44,7 +44,10 @@ func setFileLogger() (zapcore.Core, []zap.Option) {
 
 	encoder := zapcore.NewJSONEncoder(config)
 
-	logLevel := zap.NewAtomicLevelAt(zap.InfoLevel)
+	logLevel := zap.NewAtomicLevelAt(zap.DebugLevel)
+	if !configs.Runtime.API.DebugMode {
+		logLevel = zap.NewAtomicLevelAt(zap.InfoLevel)
+	}
 	options := make([]zap.Option, 0)
 
 	var gitRevision, goVersion string

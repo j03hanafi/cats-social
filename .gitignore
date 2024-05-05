@@ -3,3 +3,4 @@
 /logs
 /cats-social
 *.toml
+/bin

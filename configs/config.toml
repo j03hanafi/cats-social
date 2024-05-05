@@ -3,14 +3,14 @@
     Host = ""
     Port = 8080
     Version = "1.0.0"
-    Env = "dev"
+    Env = "local"
     ContextTimeout = 10
 [API]
     BaseURL = "/v1"
     Timeout = 15
     DebugMode = true
 #    BCRYPT_SALT = 8
-    Parser = "go-json"
+    Parser = "sonic"
     [API.JWT]
         Expire = 28800
 #        JWT_SECRET = "secret-toml"
