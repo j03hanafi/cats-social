@@ -31,7 +31,6 @@ type apiCfg struct {
 	Timeout    int    `mapstructure:"Timeout"`
 	DebugMode  bool   `mapstructure:"DebugMode"`
 	BCryptSalt int    `mapstructure:"BCRYPT_SALT"`
-	Parser     string `mapstructure:"Parser"`
 	JWT        jwt    `mapstructure:"JWT"`
 }
 
@@ -41,11 +40,11 @@ type jwt struct {
 }
 
 type dbCfg struct {
-	Name                  string   `mapstructure:"DB_NAME"`
-	Port                  int      `mapstructure:"DB_PORT"`
-	Host                  string   `mapstructure:"DB_HOST"`
-	Username              string   `mapstructure:"DB_USERNAME"`
-	Password              string   `mapstructure:"DB_PASSWORD"`
-	Params                []string `mapstructure:"DB_PARAMS"`
-	MaxConnPoolMultiplier int      `mapstructure:"MaxConnPoolMultiplier"`
+	Name        string   `mapstructure:"DB_NAME"`
+	Port        int      `mapstructure:"DB_PORT"`
+	Host        string   `mapstructure:"DB_HOST"`
+	Username    string   `mapstructure:"DB_USERNAME"`
+	Password    string   `mapstructure:"DB_PASSWORD"`
+	Params      []string `mapstructure:"DB_PARAMS"`
+	MaxConnPool int      `mapstructure:"MaxConnPool"`
 }

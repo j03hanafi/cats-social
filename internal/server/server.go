@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/bytedance/sonic"
-	"github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 
@@ -20,8 +19,7 @@ import (
 )
 
 const (
-	localEnv   = "local"
-	sonicParse = "sonic"
+	localEnv = "local"
 )
 
 func Run() {
@@ -40,8 +38,8 @@ func Run() {
 		DisableDefaultDate: true,
 		DisableKeepalive:   true,
 		EnablePrintRoutes:  true,
-		JSONDecoder:        json.Unmarshal,
-		JSONEncoder:        json.Marshal,
+		JSONDecoder:        sonic.Unmarshal,
+		JSONEncoder:        sonic.Marshal,
 		ReadTimeout:        serverTimeout,
 		ReduceMemoryUsage:  true,
 		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
@@ -56,11 +54,6 @@ func Run() {
 
 	if configs.Runtime.App.Env != localEnv {
 		serverConfig.Prefork = true
-	}
-
-	if configs.Runtime.API.Parser == sonicParse {
-		serverConfig.JSONDecoder = sonic.Unmarshal
-		serverConfig.JSONEncoder = sonic.Marshal
 	}
 
 	app := fiber.New(serverConfig)

@@ -17,7 +17,7 @@ func NewConfig() error {
 	readEnv(runtimeViper)
 
 	// ListCats config from file
-	err := readConfigFile(runtimeViper, "config", "toml", "./configs")
+	err := readConfigFile(runtimeViper, "config", "toml", "configs")
 	if err != nil {
 		return fmt.Errorf("%s failed to read config file: %v\n", callerInfo, err)
 	}
