@@ -46,8 +46,7 @@ func (m MatchService) NewMatch(ctx context.Context, match domain.Match, userID u
 
 	// Check matchCatId is exist
 	cats, err := m.catRepository.Get(ctx, userID, domain.QueryParam{
-		ID:    match.MatchCatID,
-		Owned: domain.FalseBool,
+		ID: match.MatchCatID,
 	}, false)
 	if err != nil {
 		l.Error("error get cat", zap.Error(err))
@@ -107,11 +106,11 @@ func (m MatchService) NewMatch(ctx context.Context, match domain.Match, userID u
 	}
 
 	// Make sure not the same owner
-	if matchCat.UserID == userCat.UserID {
-		err = domain.ErrCatSameOwner
-		l.Error("error check same owner", zap.Error(err))
-		return match, err
-	}
+	//if matchCat.UserID == userCat.UserID {
+	//	err = domain.ErrCatSameOwner
+	//	l.Error("error check same owner", zap.Error(err))
+	//	return match, err
+	//}
 
 	match, err = m.matchRepository.NewMatch(ctx, match)
 	if err != nil {
